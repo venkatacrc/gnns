@@ -17,7 +17,7 @@ self.COURSE_SCRIPTS = [
     'js/content/m05-evaluation.js',
     'js/content/m06-substitutes.js',
     'js/content/m07-relational.js',
-    'js/content/m08-transformers-fms.js',
+    'js/content/m08-transformers.js',
     'js/content/m09-fraud.js',
     'js/content/m10-production.js',
     'js/content/m11-agents.js',

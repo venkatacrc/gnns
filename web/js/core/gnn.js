@@ -156,7 +156,8 @@
         return p;
     }
 
-    // Hop-by-hop label propagation: seeds stay at 1, everyone else takes decay * mean(neighbors).
+    // Hop-by-hop label propagation: seeds stay at 1, everyone else takes decay * max(neighbors),
+    // i.e. the strength of the strongest path back to a known-bad seed.
     function labelPropagation(adj, seeds, hops, decay = 0.6) {
         const n = adj.length;
         const isSeed = new Set(seeds);
