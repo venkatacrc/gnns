@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f6f2ec" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+    <meta name="description" content="Step-by-step Graph Neural Networks course with hands-on labs, grounded in retail recommendations and fraud.">
+    <title>GNN Lab · Graph Neural Networks, step by step</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div id="app">
+        <header class="topbar">
+            <button class="icon-btn" id="open-drawer" aria-label="Modules and options" aria-controls="drawer" aria-expanded="false"></button>
+            <a class="brand" href="#/" aria-label="GNN Lab home"><span class="brand-dot" aria-hidden="true">◉</span> GNN Lab</a>
+            <div class="progress" id="progress" aria-live="polite"></div>
+        </header>
+        <main id="main" tabindex="-1"></main>
+    </div>
+    <div class="scrim" id="scrim" hidden></div>
+    <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Modules">
+        <div class="drawer-head">
+            <strong>Course map</strong>
+            <button class="icon-btn" id="close-drawer" aria-label="Close menu"></button>
+        </div>
+        <nav class="drawer-body" id="drawer-body"></nav>
+        <div class="drawer-foot" id="drawer-foot"></div>
+    </aside>
+    <noscript>This course needs JavaScript to run its interactive labs.</noscript>
+    <script src="files.js"></script>
+    <script>
+        // Load scripts in order from files.js (async=false keeps execution order).
+        for (const src of self.COURSE_SCRIPTS) {
+            const el = document.createElement('script');
+            el.src = `${src}?v=${self.COURSE_VERSION}`;
+            el.async = false;
+            document.body.appendChild(el);
+        }
+    </script>
+</body>
+</html>

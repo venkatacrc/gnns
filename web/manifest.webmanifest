@@ -1,0 +1,16 @@
+{
+    "name": "GNN Lab: Graph Neural Networks, step by step",
+    "short_name": "GNN Lab",
+    "description": "Hands-on GNN course: retail recommendations, relational deep learning, graph transformers and fraud.",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#f6f2ec",
+    "theme_color": "#f6f2ec",
+    "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+        { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}
