@@ -19,14 +19,11 @@
             pay(s, t, 20 + r() * 400, C.randInt(r, 90));
         }
         const patterns = {};
-        // fan-in: many victims / mule recruits pay one collector within a few days
+        // fan-in: six distinct victims / mule recruits pay one collector within a few days
         const collector = add('mule-collector');
-        patterns.fanIn = { center: collector, members: [] };
-        for (let i = 0; i < 6; i++) {
-            const v = C.randInt(r, normalAccounts);
-            patterns.fanIn.members.push(v);
-            pay(v, collector, 900 + r() * 200, 60 + C.randInt(r, 3));
-        }
+        const normals = Array.from({ length: normalAccounts }, (_, i) => i);
+        patterns.fanIn = { center: collector, members: C.sample(r, normals, 6) };
+        for (const v of patterns.fanIn.members) pay(v, collector, 900 + r() * 200, 60 + C.randInt(r, 3));
         // fan-out: the collector (or a new hub) disperses to fresh accounts
         const hub = add('dispersal-hub');
         pay(collector, hub, 5500, 64);

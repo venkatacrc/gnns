@@ -43,7 +43,7 @@ GNN.module({
             body: `<ul><li><b>Popularity</b>: most-bought unowned items.</li>
 <li><b>Item-kNN</b>: score items by co-purchase similarity to what the customer owns.</li>
 <li><b>Last-category</b> or business rules.</li></ul>
-<p>On the course's synthetic retail world (one seed): popularity Recall@5 is about 0.32, item-kNN about 0.37, the dual encoder about 0.42 after enough training. That is a preliminary single-seed result, not a guarantee. Lab 5 makes you check it across seeds.</p>`,
+<p>Measured on the course's synthetic retail world over <b>5 seeds</b> (Recall@5, <code>node tools/seed_sweep.js</code>): popularity <b>0.30</b>, item-kNN <b>0.38</b>, the best masked dual encoder <b>0.39 ± 0.03</b>. The GNN-lite only <b>ties</b> a well-built item-kNN at this tiny scale. That is the lesson: a model that cannot clearly beat a cheap baseline across seeds has not earned its complexity yet. Lab 5 makes you check this yourself.</p>`,
         },
         {
             title: 'Random splits leak time',

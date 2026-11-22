@@ -85,6 +85,7 @@ test('fraud detectors recover every planted pattern', () => {
     const g = F.makeTransactionGraph(5);
     const n = g.accounts.length;
     assert.ok(C.fanIn(n, g.txns, 5).includes(g.patterns.fanIn.center));
+    assert.equal(new Set(g.patterns.fanIn.members).size, 6, 'fan-in victims must be distinct');
     assert.ok(C.fanOut(n, g.txns, 5).includes(g.patterns.fanOut.center));
     const ring = g.patterns.cycle.members.slice().sort((a, b) => a - b);
     assert.ok(C.findCycles(n, g.txns, 5).some((cyc) => cyc.slice().sort((a, b) => a - b).join() === ring.join()));
@@ -121,6 +122,14 @@ test('dual encoder beats popularity; removing the positive mask lowers loss but 
     assert.ok(masked.heldRecall > pop, `masked ${masked.heldRecall} vs pop ${pop}`);
     assert.ok(leaky.loss < masked.loss, 'leaky training loss should look better');
     assert.ok(leaky.heldRecall < masked.heldRecall, 'but generalize worse');
+});
+
+test('item-kNN beats popularity on every sweep seed', () => {
+    for (const seed of [7, 8, 9, 10, 11]) {
+        const w = R.makeRetailWorld(seed);
+        const split = R.splitEdges(w, { seed: seed + 100 });
+        assert.ok(R.itemKnnBaseline(w, split, 5).heldRecall > R.popularityBaseline(w, split, 5).heldRecall, `seed ${seed}`);
+    }
 });
 
 test('dropFuel removes gasoline from supervision', () => {

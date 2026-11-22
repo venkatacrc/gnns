@@ -153,8 +153,10 @@
     //   customer tower: u_c = W * mean(e_p over the customer's conv set)   (a 1-hop graph convolution)
     // opts.mask: hold the target positive out of the conv set (the 48/16 trick) to block shortcut leakage.
     // opts.randomNegs / opts.hardNegs: sizes of the easy (uniform catalog) and hard (same category) pools.
+    // Defaults come from tools/seed_sweep.js: in this small world, same-category "hard" negatives are often
+    // true positives (false negatives), so the random-only pool generalizes best. Lab 4 lets you verify that.
     function trainDualEncoder(world, split, opts = {}) {
-        const { dim = 16, steps = 12000, lr = 0.05, mask = true, randomNegs = 8, hardNegs = 4, seed = 11, evalEvery = 1000, k = 5 } = opts;
+        const { dim = 16, steps = 12000, lr = 0.05, mask = true, randomNegs = 12, hardNegs = 0, seed = 11, evalEvery = 1000, k = 5 } = opts;
         const r = C.rng(seed);
         const P = world.products.length;
         const E = C.randomMatrix(r, P, dim, 0.1);
@@ -219,7 +221,22 @@
         return evaluate(world, split, () => [1], pop.map((x) => [x]), k);
     }
 
-    const api = { CATEGORIES, isStaple, makeRetailWorld, edgeCounts, coPurchase, edgeWeight, biasedWalkVisits, splitEdges, trainDualEncoder, evaluate, popularityBaseline };
+    // Item-kNN: score each item by summed cosine co-purchase similarity to the items a customer owns.
+    // Similarities come from training positives only, so held-out edges never leak in.
+    function itemKnnBaseline(world, split, k = 10) {
+        const P = world.products.length;
+        const co = C.zeros(P, P), deg = new Array(P).fill(0);
+        for (const pos of split.trainPos) {
+            for (const a of pos) { deg[a] += 1; for (const b of pos) if (a !== b) co[a][b] += 1; }
+        }
+        const sim = co.map((row, a) => row.map((x, b) => (x ? x / Math.sqrt(deg[a] * deg[b]) : 0)));
+        // evaluate() scores items as dot(u, E[p]); a one-hot E plus u = summed similarity rows does exactly that.
+        const E = Array.from({ length: P }, (_, p) => { const e = new Array(P).fill(0); e[p] = 1; return e; });
+        const embed = (pos) => { const u = new Array(P).fill(0); for (const a of pos) for (let b = 0; b < P; b++) u[b] += sim[a][b]; return u; };
+        return evaluate(world, split, embed, E, k);
+    }
+
+    const api = { CATEGORIES, isStaple, makeRetailWorld, edgeCounts, coPurchase, edgeWeight, biasedWalkVisits, splitEdges, trainDualEncoder, evaluate, popularityBaseline, itemKnnBaseline };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.GNNRetail = api;
 })(typeof window !== 'undefined' ? window : globalThis);
