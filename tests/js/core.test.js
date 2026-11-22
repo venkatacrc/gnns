@@ -124,6 +124,13 @@ test('dual encoder beats popularity; removing the positive mask lowers loss but 
     assert.ok(leaky.heldRecall < masked.heldRecall, 'but generalize worse');
 });
 
+test('meanStd reports population mean and spread', () => {
+    const { mean, std } = C.meanStd([2, 4, 4, 4, 5, 5, 7, 9]);
+    assert.equal(mean, 5);
+    assert.equal(std, 2);
+    assert.deepEqual(C.meanStd([]), { mean: 0, std: 0 });
+});
+
 test('item-kNN beats popularity on every sweep seed', () => {
     for (const seed of [7, 8, 9, 10, 11]) {
         const w = R.makeRetailWorld(seed);

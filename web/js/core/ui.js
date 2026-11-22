@@ -127,5 +127,8 @@
         return svg;
     }
 
-    root.UI = { h, s, clear, fmt, pct, slider, select, toggle, button, controls, note, stats, table, barChart, lineChart, heatmap };
+    // Defer heavy work until after the browser paints (so "Training..." shows first). Returns a cancel fn.
+    const later = (fn, ms = 30) => { const id = setTimeout(fn, ms); return () => clearTimeout(id); };
+
+    root.UI = { h, s, clear, fmt, pct, slider, select, toggle, button, controls, note, stats, table, barChart, lineChart, heatmap, later };
 })(window);

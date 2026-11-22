@@ -203,6 +203,12 @@
     const topK = (scores, k, exclude = new Set()) =>
         scores.map((s, i) => [s, i]).filter(([, i]) => !exclude.has(i))
             .sort((a, b) => b[0] - a[0]).slice(0, k).map(([, i]) => i);
+    // Mean and (population) standard deviation, for reporting results across seeds.
+    function meanStd(xs) {
+        if (!xs.length) return { mean: 0, std: 0 };
+        const mean = xs.reduce((a, b) => a + b, 0) / xs.length;
+        return { mean, std: Math.sqrt(xs.reduce((s, x) => s + (x - mean) ** 2, 0) / xs.length) };
+    }
 
     // ---------- fraud / AML subgraph patterns on directed transfers {s, t} ----------
     function degreesByDirection(n, txns) {
@@ -292,7 +298,7 @@
         rng, randInt, choice, gaussian, shuffle, sample, weightedChoice,
         zeros, randomMatrix, matmul, transpose, matvec, relu, dot, norm, cosine, softmax, meanVec, featureSpread,
         adjacencyLists, adjacencyMatrix, messagePass, gcnLayer, fanoutCost, ppr, labelPropagation,
-        decayWeight, hitAtK, recallAtK, precisionAtK, mrr, ndcgAtK, topK,
+        decayWeight, hitAtK, recallAtK, precisionAtK, mrr, ndcgAtK, topK, meanStd,
         fanIn, fanOut, findCycles, scatterGather, greedyPCST,
     };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
