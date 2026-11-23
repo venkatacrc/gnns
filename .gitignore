@@ -5,7 +5,9 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
-mac/.build/
+build/
+app/.build/
+app/.swiftpm/
 dist/
 *.app
 .shots/

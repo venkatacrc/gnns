@@ -11,6 +11,20 @@ browser on synthetic retail and transaction data.
 
 ## Open it
 
+### Mac: native app (like `sloka_words`)
+
+```bash
+./scripts/build_app.sh
+open build/GNNLab.app
+```
+
+A thin SwiftUI + WKWebView shell (`app/`) with the course in `web/` bundled inside the `.app` and
+served over a private `gnnlab://` scheme: fully offline, no server, progress saved between
+launches. Paper links open in your default browser. Drag `build/GNNLab.app` to `/Applications` to
+keep it. Rebuild after changing anything in `web/`. Needs Xcode or the Command Line Tools (Swift 5.9+), macOS 14+.
+
+### Mac or Pixel: installable web app
+
 ```bash
 node tools/serve.js          # prints a localhost URL and a phone URL for the same Wi-Fi
 ```
@@ -19,9 +33,11 @@ node tools/serve.js          # prints a localhost URL and a phone URL for the sa
   or Chrome **Install page as app**. It gets its own window and Dock icon.
 - **Pixel:** open the phone URL in Chrome, then **Install app** / **Add to Home screen**. It launches
   full screen.
-- Both work **offline** after the first load (service worker). Progress is stored locally per device.
+- Both work **offline** after the first load (service worker). Progress is stored locally per device
+  (and separately per app: the native Mac app does not share progress with Safari or Chrome).
 
-No build step, no dependencies: vanilla JS, HTML and CSS. Node 18+ is needed only for the server and tests.
+The course itself has no build step and no dependencies: vanilla JS, HTML and CSS. Node 18+ is
+needed only for the server and tests; Swift only for the native Mac app.
 
 ## What's inside
 
@@ -66,6 +82,8 @@ web/                 the app (source of truth)
 tests/js/            unit tests for the core (node --test)
 tests/e2e/smoke.mjs  headless-Chrome smoke test (DevTools protocol, no dependencies)
 tools/               serve.js, check_content.js, seed_sweep.js, layout_probe.js, make_icons.js
+app/                 native Mac shell: SwiftUI + WKWebView, gnnlab:// scheme handler, --self-test
+scripts/             build_app.sh (-> build/GNNLab.app), make_icon.swift (Mac icon from the PWA art)
 ```
 
 ## Checks
@@ -75,6 +93,9 @@ npm test                    # unit tests + content check (sources, labs, CSS var
 npm run e2e                 # every tab of every module at Mac and Pixel 7 sizes; runs the long labs
 SHOTS=1 npm run e2e         # also saves a full-page screenshot of each lab to .shots/
 npm run sweep               # 5-seed recommender comparison behind Module 5's numbers
+./build/GNNLab.app/Contents/MacOS/GNNLab --self-test [--snapshot out.png]
+                            # native app: boots the bundled course, checks modules load with no JS
+                            # errors and localStorage persists (run twice), optional page snapshot
 ```
 
 After changing any shipped file, bump `COURSE_VERSION` in `web/files.js` so installed copies update.
