@@ -3,14 +3,13 @@
 // confidence (calibrated) or a sharper curve (overconfident); the LLM has a fixed accuracy knob.
 GNN.lab('lab06', {
     title: 'Hybrid routing: when to call the LLM',
-    goal: 'Route product pairs between a cheap statistical model (a stand-in for Kumo Tabular / XGBoost) and an LLM fallback, and find the threshold that balances accuracy against LLM calls.',
+    goal: 'Route product pairs between a cheap statistical model (a stand-in for gradient-boosted trees or a tabular foundation model) and an LLM fallback, and find the threshold that balances accuracy against LLM calls.',
     steps: [
         'With a calibrated model, sweep the threshold. Find where hybrid accuracy beats both single models.',
         'Turn on <b>overconfident</b>. The reliability bars drift below the diagonal. What happens to the hybrid curve?',
         'Lower LLM accuracy to 0.7 (models disagreeing, hallucinated reasons). Where should the threshold move?',
         'Note the share of pairs routed to the LLM: that is your cost and latency bill.',
     ],
-    python: 'python/labs/lab06_hybrid.py',
     mount(stage) {
         const { h, clear } = UI, C = GNNCore, R = GNNRetail;
         const world = R.makeRetailWorld(7);

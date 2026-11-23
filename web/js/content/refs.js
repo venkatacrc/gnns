@@ -1,4 +1,5 @@
-// Bibliography. kind: 'paper' (public, peer/preprint) | 'walmart' (internal meeting notes: do not publish).
+// Bibliography: public papers only (arXiv preprints and peer-reviewed venues).
+// Vendor-authored papers are marked in their note; treat their headline numbers as vendor-reported.
 GNN.refs = {
     rdl: {
         kind: 'paper', title: 'Relational Deep Learning: Graph Representation Learning on Relational Databases',
@@ -18,7 +19,7 @@ GNN.refs = {
     kumorfm2: {
         kind: 'paper', title: 'KumoRFM-2: Scaling Foundation Models for Relational Learning',
         authors: 'Hudovernik, Lopez, Kocijan, Nitta, Lenssen, Leskovec, et al.', year: 2026, url: 'https://arxiv.org/abs/2604.12596',
-        note: 'In-context learning + fine-tuning on raw multi-table data, early task injection, robust to cold start and noise, billion-scale.',
+        note: 'In-context learning + fine-tuning on raw multi-table data, early task injection, robust to cold start and noise, billion-scale. Vendor-authored (Kumo): results are vendor-reported.',
     },
     relbench2: {
         kind: 'paper', title: 'RelBench v2: A Large-Scale Benchmark and Repository for Relational Data',
@@ -33,7 +34,7 @@ GNN.refs = {
     pql: {
         kind: 'paper', title: 'Predictive Query Language: A Domain-Specific Language for Predictive Modeling on Relational Databases',
         authors: 'Kocijan, Sunil, Lenssen, Deb, Xe, Reyes Gomez, et al.', year: 2026, url: 'https://arxiv.org/abs/2602.09572',
-        note: 'SQL-inspired declarative task definitions that compute training labels automatically.',
+        note: 'SQL-inspired declarative task definitions that compute training labels automatically. Vendor-authored (Kumo).',
     },
     gretriever: {
         kind: 'paper', title: 'G-Retriever: Retrieval-Augmented Generation for Textual Graph Understanding and Question Answering',
@@ -65,16 +66,59 @@ GNN.refs = {
         authors: 'Xu, Hu, Leskovec, Jegelka', year: 2018, url: 'https://arxiv.org/abs/1810.00826',
         note: 'Message passing is at most as expressive as the 1-WL test; sum aggregation reaches it.',
     },
-    wmCollab: {
-        kind: 'walmart', title: 'Walmart & NVIDIA (Kumo) Collaboration: GNNs & Tabular Foundation Models (brainstorm summary)',
-        note: 'Substitute vs complement signals, hybrid routing, PinSage-inspired Foundation GNN, negatives, masking, T-60/T-30 evaluation, decayed clickstream features, action items.',
+    mcauley: {
+        kind: 'paper', title: 'Inferring Networks of Substitutable and Complementary Products',
+        authors: 'McAuley, Pandey, Leskovec', year: 2015, url: 'https://arxiv.org/abs/1506.08839',
+        note: 'Learns substitute ("also viewed") vs complement ("also bought") relations from product text and co-behavior.',
     },
-    wmTech: {
-        kind: 'walmart', title: 'Walmart & NVIDIA Technical Discussion: Kumo, GNNs, and Decision Models',
-        note: 'Biased walks and disaggregated sampling, Kumo Engine and multi-GPU, open recipes, context parallelism, agentic orchestration, decision models, KV context cache under 250 ms.',
+    node2vec: {
+        kind: 'paper', title: 'node2vec: Scalable Feature Learning for Networks',
+        authors: 'Grover, Leskovec', year: 2016, url: 'https://arxiv.org/abs/1607.00653',
+        note: 'Biased second-order random walks trade off breadth-first and depth-first exploration.',
     },
-    nvFraud: {
-        kind: 'walmart', title: 'NVIDIA / Kumo: Graph Transformers and Foundation Models for Fraud (deck)',
-        note: 'Relational DL platform, AML subgraph patterns, GraphEngine scale, point-in-time sampling, deep-to-shallow distillation served under 100 ms.',
+    pixie: {
+        kind: 'paper', title: 'Pixie: A System for Recommending 3+ Billion Items to 200+ Million Users in Real-Time',
+        authors: 'Eksombatchai, Jindal, Liu, Liu, Sharma, Sugnet, Ulrich, Leskovec', year: 2017, url: 'https://arxiv.org/abs/1711.07601',
+        note: 'Biased random walks with early stopping over a pruned bipartite graph for real-time recommendation.',
+    },
+    tgn: {
+        kind: 'paper', title: 'Temporal Graph Networks for Deep Learning on Dynamic Graphs',
+        authors: 'Rossi, Chamberlain, Frasca, Eynard, Monti, Bronstein', year: 2020, url: 'https://arxiv.org/abs/2006.10637',
+        note: 'Per-node memory updated by timestamped events; separates fast-changing state from slow structure.',
+    },
+    glnn: {
+        kind: 'paper', title: 'Graph-less Neural Networks: Teaching Old MLPs New Tricks via Distillation',
+        authors: 'Zhang, Liu, Sun, Shah', year: 2021, url: 'https://arxiv.org/abs/2110.08727',
+        note: 'Distills a GNN into an MLP that needs no neighbor fetches at inference: the deep-to-shallow serving pattern.',
+    },
+    idgnn: {
+        kind: 'paper', title: 'Identity-aware Graph Neural Networks',
+        authors: 'You, Gomes-Selman, Ying, Leskovec', year: 2021, url: 'https://arxiv.org/abs/2101.10320',
+        note: 'Colors the seed node during message passing, so the model scores pairs (customer, item) directly.',
+    },
+    frugalgpt: {
+        kind: 'paper', title: 'FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance',
+        authors: 'Chen, Zaharia, Zou', year: 2023, url: 'https://arxiv.org/abs/2305.05176',
+        note: 'LLM cascades: answer with a cheap model when it is confident, escalate otherwise.',
+    },
+    react: {
+        kind: 'paper', title: 'ReAct: Synergizing Reasoning and Acting in Language Models',
+        authors: 'Yao, Zhao, Yu, Du, Shafran, Narasimhan, Cao', year: 2022, url: 'https://arxiv.org/abs/2210.03629',
+        note: 'Interleaves reasoning traces with tool calls; the basis of many agent loops.',
+    },
+    weber: {
+        kind: 'paper', title: 'Anti-Money Laundering in Bitcoin: Experimenting with Graph Convolutional Networks for Financial Forensics',
+        authors: 'Weber, Domeniconi, Chen, Weidele, Bellei, Robinson, Leiserson', year: 2019, url: 'https://arxiv.org/abs/1908.02591',
+        note: 'Releases the Elliptic transaction graph with illicit / licit labels over time; GCNs vs tabular baselines.',
+    },
+    amlworld: {
+        kind: 'paper', title: 'Realistic Synthetic Financial Transactions for Anti-Money Laundering Models',
+        authors: 'Altman, Blanusa, von Niederhausern, Egressy, Anghel, Atasu', year: 2023, url: 'https://arxiv.org/abs/2306.16424',
+        note: 'AMLworld: synthetic multi-bank transactions with planted laundering typologies (fan-in, fan-out, cycles, scatter-gather).',
+    },
+    multignn: {
+        kind: 'paper', title: 'Provably Powerful Graph Neural Networks for Directed Multigraphs',
+        authors: 'Egressy, von Niederhausern, Blanusa, Altman, Wattenhofer, Atasu', year: 2023, url: 'https://arxiv.org/abs/2306.11586',
+        note: 'Reverse message passing, port numbering and ego IDs let GNNs detect directed laundering patterns.',
     },
 };

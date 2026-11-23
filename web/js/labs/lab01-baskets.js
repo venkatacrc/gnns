@@ -8,7 +8,6 @@ GNN.lab('lab01', {
         'Try <b>Peanut Butter (Jif)</b>. Is Skippy (a substitute) near the top? Why might baskets hide substitutes?',
         'Change the seed. Do the conclusions survive a different world?',
     ],
-    python: 'python/labs/lab01_baskets.py',
     mount(stage) {
         const { h, clear } = UI, C = GNNCore, R = GNNRetail;
         let seed = 7, productId = null, scoring = 'raw';

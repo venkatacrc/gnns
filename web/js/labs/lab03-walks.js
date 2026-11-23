@@ -5,10 +5,9 @@ GNN.lab('lab03', {
     steps: [
         'Set <b>beta = 0</b> (count-weighted walks). Which items dominate the visit ranking?',
         'Slide <b>beta</b> to 1. Watch TV accessories climb as staples fall.',
-        'Drop walks to 50, then raise to 800. When does the ranking stabilize? (The discussed setting is 800.)',
+        'Drop walks to 50, then raise to 800. When does the ranking stabilize? More walks cost more compute, so find the smallest count that is stable.',
         'In the cost calculator, compare fanouts [15, 10, 5] with [25, 25]. Which is cheaper per seed?',
     ],
-    python: 'python/labs/lab03_walks.py',
     mount(stage) {
         const { h, clear } = UI, R = GNNRetail;
         const world = R.makeRetailWorld(7);

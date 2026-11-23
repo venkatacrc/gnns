@@ -1,6 +1,6 @@
 // Single source of truth for the app's files: index.html loads these scripts in order and
 // sw.js caches them for offline use. Bump COURSE_VERSION whenever content or code changes.
-self.COURSE_VERSION = '2026-11-20.1';
+self.COURSE_VERSION = '2026-11-23.1';
 self.COURSE_SCRIPTS = [
     'js/core/gnn.js',
     'js/core/retail.js',
@@ -37,4 +37,4 @@ self.COURSE_SCRIPTS = [
     'js/app.js',
 ];
 self.COURSE_SHELL = ['./', 'index.html', 'app.css', 'files.js', 'manifest.webmanifest',
-    'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'];
+    'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];

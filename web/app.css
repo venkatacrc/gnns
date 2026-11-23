@@ -88,7 +88,6 @@ blockquote { margin: 10px 0; padding: 8px 12px; border-left: 4px solid var(--acc
 .bar > span { display: block; height: 100%; background: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
 .chip { font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); background: var(--card); }
-.chip.walmart { border-color: var(--blue); color: var(--blue); }
 .chip.paper { border-color: var(--purple); color: var(--purple); }
 .chip.done { border-color: var(--green); color: var(--green); }
 

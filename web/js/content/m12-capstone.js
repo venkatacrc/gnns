@@ -1,13 +1,13 @@
 GNN.module({
     id: 'm12', num: 12, minutes: 60, lab: 'lab12',
     title: 'Capstone: design, run and defend a GNN system',
-    summary: 'Pull everything together: a design checklist, the consolidated action items from the NVIDIA sessions and an experiment you run and defend.',
+    summary: 'Pull everything together: a design checklist, a backlog of experiments worth running, and an experiment you run and defend.',
     objectives: [
         'Produce a one-page design covering task, graph, sampler, objective, evaluation and serving.',
         'Run a controlled multi-seed experiment and report it honestly.',
-        'Map the open action items to experiments you could run next week.',
+        'Turn the open questions from each module into experiments you could run next week.',
     ],
-    refs: ['wmCollab', 'wmTech', 'rdl', 'pql', 'relbench2'],
+    refs: ['rdl', 'pql', 'relbench2', 'mcauley', 'idgnn'],
     cards: [
         {
             title: 'The one-page design checklist',
@@ -21,13 +21,13 @@ GNN.module({
 <li><b>Decisions</b>: who consumes it, how it is explained.</li></ol>`,
         },
         {
-            title: 'Consolidated action items from the sessions',
-            body: `<ul><li>Share graph schema documentation with NVIDIA to validate construction and get Kumo model-planner recipes.</li>
-<li>Benchmark Kumo Tabular / RDB Learn vs a deterministic world-knowledge model vs the LLM baseline on substitutes vs complements; evaluate hybrid routing.</li>
-<li>Add the 3 new months; measure out-of-time decay (month 15 vs 16); implement the T-60 / T-30 proxy.</li>
-<li>Filter fuel and other noise from supervision; review cosine vs dot-product recipes.</li>
-<li>Test bi-directional embedding sharing with Search / Identity; evaluate decayed clickstream features; explore ID-GNN for direct candidates.</li></ul>`,
-            src: ['wmCollab'],
+            title: 'An experiment backlog worth stealing',
+            body: `<ul><li><b>Pair labels</b> (Module 6): benchmark a low-shot tabular model vs a deterministic world-knowledge model vs an LLM baseline on substitutes vs complements; then evaluate the confidence-routed hybrid.</li>
+<li><b>Staleness</b> (5): add new months of data; measure one-month vs two-month out-of-time decay; run the frozen-embedding probe.</li>
+<li><b>Supervision</b> (4): filter fuel and other noise items; compare cosine vs dot-product scoring.</li>
+<li><b>Real-time signal</b> (10): decayed clickstream features vs inference-time edges; an ID-GNN head for direct candidates.</li>
+<li><b>Graph construction</b> (1, 3): document the schema and have someone outside the team review it.</li></ul>`,
+            src: ['mcauley', 'idgnn'],
         },
         {
             title: 'One change at a time, many seeds',
@@ -36,7 +36,7 @@ GNN.module({
         },
         {
             title: 'Write the hypothesis first',
-            body: `<p>Template: <i>"Masking positives (48/16) will raise held-out Recall@5 by at least 2 points versus no masking, because it removes the convolution shortcut. If the gap is within seed noise, we keep the simpler setup."</i></p>
+            body: `<p>Template: <i>"Masking a quarter of the positives will raise held-out Recall@5 by at least 2 points versus no masking, because it removes the convolution shortcut. If the gap is within seed noise, we keep the simpler setup."</i></p>
 <p>Deciding the threshold <b>before</b> running is what separates an experiment from a fishing trip.</p>`,
         },
         {
@@ -46,7 +46,7 @@ GNN.module({
 <li><b>Staleness</b>: embeddings age; walks need recomputation.</li>
 <li><b>Adoption</b>: consumers cannot integrate the output.</li>
 <li><b>Scale</b>: sampler throughput, multi-GPU loaders.</li>
-<li><b>Governance</b>: internal data stays internal; explanations for decisions.</li></ul>`,
+<li><b>Governance</b>: private data stays private; explanations for decisions.</li></ul>`,
         },
         {
             title: 'How to present results',
@@ -70,9 +70,9 @@ GNN.module({
             answer: 1, why: 'Pre-registering the threshold keeps the conclusion honest.',
         },
         {
-            q: 'Which was an agreed action item from the collaboration sessions?',
-            options: ['Remove the graph', 'Implement the T-60 / T-30 proxy and measure month 15 vs 16 decay', 'Stop using negatives', 'Publish internal data'],
-            answer: 1, why: 'Offline temporal proxy evaluation was a key workstream.',
+            q: 'Your embeddings look great on a random split. Which experiment from the backlog checks whether they survive time?',
+            options: ['Remove the graph', 'Measure out-of-time decay and run the frozen-embedding probe', 'Stop using negatives', 'Add more layers'],
+            answer: 1, why: 'Temporal evaluation shows whether embedding quality survives staleness.',
         },
     ],
 });

@@ -8,7 +8,6 @@ GNN.lab('lab07', {
         'Turn on <b>snapshot leak</b>: the feature is read from a customer table snapshot taken when the training table was built, at the end of the label window. Accuracy hits 100%. Explain exactly why.',
         'Turn on the <b>WHERE active</b> filter. Why are some customers no longer in the table at all?',
     ],
-    python: 'python/labs/lab07_pql.py',
     mount(stage) {
         const { h, clear } = UI, R = GNNRetail;
         const world = R.makeRetailWorld(7);

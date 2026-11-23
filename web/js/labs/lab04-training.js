@@ -8,7 +8,6 @@ GNN.lab('lab04', {
         'Toggle <b>drop fuel from supervision</b>. Does held-out recall move more than the seed noise (try two seeds)?',
         'Every run lands in the run log. Change one knob at a time.',
     ],
-    python: 'python/labs/lab04_training.py',
     mount(stage) {
         const { h, clear } = UI, R = GNNRetail;
         const cfg = { mask: true, randomNegs: 12, hardNegs: 0, steps: 12000, dropFuel: false, seed: 7 };
@@ -57,7 +56,7 @@ GNN.lab('lab04', {
             });
         };
         stage.append(UI.controls(
-            UI.toggle({ label: 'Mask positives (48/16 style)', checked: cfg.mask, onChange: (v) => { cfg.mask = v; } }),
+            UI.toggle({ label: 'Mask positives (hold targets out of the convolution)', checked: cfg.mask, onChange: (v) => { cfg.mask = v; } }),
             UI.slider({ label: 'Random negatives', min: 0, max: 20, value: cfg.randomNegs, onInput: (v) => { cfg.randomNegs = v; } }),
             UI.slider({ label: 'Hard (same-category) negatives', min: 0, max: 12, value: cfg.hardNegs, onInput: (v) => { cfg.hardNegs = v; } }),
             UI.slider({ label: 'Steps', min: 2000, max: 20000, step: 2000, value: cfg.steps, onInput: (v) => { cfg.steps = v; } }),

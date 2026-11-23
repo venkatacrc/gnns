@@ -7,13 +7,13 @@ GNN.module({
         'Describe in-context learning for relational data and when to fine-tune.',
         'Explain how synthetic databases enable scaling laws (PluRel).',
     ],
-    refs: ['relgt', 'kumorfm2', 'plurel', 'relbench2', 'wmTech', 'nvFraud'],
+    refs: ['relgt', 'kumorfm2', 'plurel', 'relbench2'],
     cards: [
         {
             title: 'Where message passing runs out of road',
             body: `<p>Message passing is local: k layers, k hops, and everything squeezed into one vector (Module 2). On relational databases the useful signal is often <b>several joins away</b> (customer -> order -> item -> product -> other orders) and comes with timestamps and types that plain GNNs encode clumsily.</p>
-<p>Transformers let any token attend to any other: the NVIDIA deck calls it <b>teleporting the signal</b> across the graph.</p>`,
-            src: ['nvFraud'],
+<p>Transformers let any token attend to any other, in effect <b>teleporting the signal</b> across the graph instead of relaying it hop by hop.</p>`,
+            src: ['relgt'],
         },
         {
             title: 'Positional encodings: the hard part',
@@ -42,7 +42,7 @@ GNN.module({
             title: 'Relational foundation models and in-context learning',
             body: `<p>A foundation model pretrained across many databases can predict on a <b>new</b> database without task-specific training: you supply labeled <b>context examples</b> (past seeds with labels) alongside the query, and the model infers the pattern at inference time.</p>
 <p>That is why the rule in Module 0 says: sparse labels, try the FM first. Ten to a hundred examples can be enough to get a useful baseline in minutes.</p>`,
-            src: ['kumorfm2', 'wmCollab'],
+            src: ['kumorfm2', 'plurel'],
         },
         {
             title: 'KumoRFM-2 in one card',
@@ -61,15 +61,15 @@ GNN.module({
         },
         {
             title: 'Context length is the new bottleneck',
-            body: `<p>Pushing millions of multi-hop transactions into a single inference pass hits context limits. NVIDIA is adding <b>context parallelism</b> to Kumo Tabular: shard long contexts across GPUs.</p>
-<p>The caution from the same session: <b>more context without alignment does not guarantee accuracy</b>. Do domain fine-tuning first (the plan was to fine-tune on Sam's Club benchmark data, chosen for structured labels and lower noise), then scale context.</p>`,
-            src: ['wmTech'],
+            body: `<p>Pushing millions of multi-hop transactions into a single inference pass hits context limits. <b>Context parallelism</b> shards one long context across several GPUs, as is now common for long-context LLMs.</p>
+<p>The caution: <b>more context without alignment does not guarantee accuracy</b>. Fine-tune on in-domain data with clean, structured labels first, then scale context. KumoRFM-2 pairs in-context learning with fine-tuning for this reason.</p>`,
+            src: ['kumorfm2'],
         },
         {
-            title: 'Open weights, open recipes',
-            body: `<p>Walmart raised the risk of acquired software going proprietary. NVIDIA reaffirmed an <b>open-source / open-weight</b> policy (weights published openly, e.g. on Hugging Face, preserving forking rights) and has published the <b>training recipes</b>: hyperparameter schedules, losses and data formatting needed to fine-tune on proprietary data.</p>
-<p>RAPIDS, cuGraph and cuDF remain the shared open baseline for joint engineering.</p>`,
-            src: ['wmTech'],
+            title: 'Why open weights and open recipes matter',
+            body: `<p>A pretrained model you cannot download is a dependency you cannot audit, fork or fine-tune on private data. Prefer models with <b>published weights</b> and <b>published training recipes</b>: the hyperparameter schedules, losses and data formatting needed to adapt them.</p>
+<p>Check the licence too: "open weights" ranges from fully permissive to research-only. Open libraries (PyG, RAPIDS cuGraph and cuDF) keep the surrounding pipeline portable.</p>`,
+            src: ['pyg2'],
         },
     ],
     quiz: [
@@ -94,7 +94,7 @@ GNN.module({
             answer: 1, why: 'Synthetic schemas, FK connectivity and causal features produce plentiful pretraining data.',
         },
         {
-            q: 'What was NVIDIA\'s caution about context parallelism?',
+            q: 'What is the caution about scaling context in relational foundation models?',
             options: ['It is impossible', 'Bigger context without domain fine-tuning does not guarantee better accuracy', 'It only works on CPUs', 'It removes timestamps'],
             answer: 1, why: 'Align with domain fine-tuning first, then scale context.',
         },

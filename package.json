@@ -1,0 +1,13 @@
+{
+  "name": "gnn-course",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Hands-on GNN course (offline PWA) for Mac and Android, built on public papers and synthetic labs.",
+  "scripts": {
+    "test": "node --test tests/js/*.test.js && node tools/check_content.js",
+    "e2e": "node tests/e2e/smoke.mjs",
+    "serve": "node tools/serve.js",
+    "sweep": "node tools/seed_sweep.js",
+    "icons": "node tools/make_icons.js"
+  }
+}

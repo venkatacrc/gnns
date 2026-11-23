@@ -7,7 +7,7 @@ GNN.module({
         'Explain how random-walk visit counts approximate Personalized PageRank.',
         'Describe the frequency / cadence bias fix and disaggregated sampling.',
     ],
-    refs: ['pinsage', 'sage', 'pyg2', 'wmCollab', 'wmTech', 'nvFraud'],
+    refs: ['pinsage', 'pixie', 'node2vec', 'sage', 'pyg2'],
     cards: [
         {
             title: 'Why you cannot train on the whole graph',
@@ -29,42 +29,42 @@ GNN.module({
             src: ['pinsage'],
         },
         {
-            title: 'The Walmart walk recipe (as discussed)',
+            title: 'A worked walk recipe',
             body: `<ul><li>Walks follow <b>customer -> product -> customer -> product</b> ("other TV buyers also bought TV stands and Apple TVs").</li>
-<li><b>800 walks per customer</b>, giving about <b>1,600 item visits</b> with duplicates.</li>
-<li>Rank items by visit count (10x, 8x, 5x ... 1x) and keep the <b>top 400</b>: effectively a PPR neighborhood, stored to disk.</li></ul>
-<p>That ranked list later supplies positives (top 64) and customer hard negatives (ranks 200-400): Module 4.</p>`,
-            src: ['wmCollab'],
+<li>Run a few hundred short walks per customer, collecting a thousand or so item visits with duplicates.</li>
+<li>Rank items by visit count (10x, 8x, 5x ... 1x) and keep the <b>top T</b>: effectively a PPR neighborhood, stored for training.</li></ul>
+<p>The ranked list then supplies positives from the top and <b>hard negatives</b> from the middle ranks, which PinSage uses as a curriculum: related items that are not the answer (Module 4). These counts are illustrative; tune them on your graph.</p>`,
+            src: ['pinsage', 'pixie'],
         },
         {
             title: 'Frequency bias: bananas vs TVs',
             body: `<p>A count-weighted walk from a TV buyer mostly lands on milk and bananas, because those edges have huge counts. The TV-related signal (stand, HDMI cable, soundbar) is drowned out.</p>
-<p>The fix discussed is <b>purchase-rate decay / frequency bias</b>: divide edge weight by the category's purchase cadence, roughly <code>w = count / cadence^beta</code>. In the lab, slide <code>beta</code> from 0 to 1 and watch TV accessories climb the ranking.</p>`,
-            src: ['wmCollab'],
+<p>A simple fix is <b>purchase-rate decay / frequency bias</b>: divide edge weight by the category's purchase cadence, roughly <code>w = count / cadence^beta</code>. In the lab, slide <code>beta</code> from 0 to 1 and watch TV accessories climb the ranking.</p>`,
+            src: ['pixie'],
         },
         {
-            title: 'Custom bias formulas in the sampler',
-            body: `<p>Retail data has a high noise floor. Default neighbor loaders in cuGraph and PyG lacked dynamic bias parameters, so teams fell back on manual inverse-degree tweaks.</p>
-<p>The engineering goal discussed with NVIDIA: put <b>user-defined bias formulas directly into the sampling stage</b> and stream structured walks to disk, with memory buffers ahead of the sampling loop to avoid I/O stalls.</p>`,
-            src: ['wmTech'],
+            title: 'Put the bias inside the sampler',
+            body: `<p>Retail data has a high noise floor, and a post-hoc fix (sample uniformly, then reweight) wastes most samples on staples. node2vec's return / in-out parameters and Pixie's biased walks both apply the bias <b>while walking</b>, so every step is spent where it matters.</p>
+<p>At scale the same principle holds: evaluate the bias formula inside the sampling kernel, stream walks to disk, and keep prefetch buffers ahead of the training loop so the GPU never waits on I/O.</p>`,
+            src: ['node2vec', 'pixie'],
         },
         {
             title: 'Disaggregated sampling',
             body: `<p>Separate the <b>graph store + sampler</b> (memory heavy, CPU or RAM) from the <b>GPU trainers</b> (compute heavy). Samplers stream subgraphs; GPUs never hold the whole graph.</p>
-<p>The Kumo GraphEngine figures in the NVIDIA deck: <b>100-500 billion rows</b>, RAM sampler with an SSD index, about <b>20M lookups/s</b>. The tech discussion stresses that naive scalable walk implementations can lose signal fidelity relative to dense methods, and disaggregated sampling is how you keep the fidelity without running out of memory.</p>`,
-            src: ['nvFraud', 'wmTech'],
+<p>PyG formalizes this split with its <b>graph store</b> and <b>feature store</b> interfaces: the sampler queries a backend that can live in RAM, on SSD or on another machine. Done well, disaggregation lets you sample the true neighborhood instead of a cheap approximation, keeping signal fidelity without running out of GPU memory.</p>`,
+            src: ['pyg2'],
         },
         {
             title: 'Point-in-time sampling',
             body: `<p>For a training example anchored at time t, only edges with timestamp &lt; t may be sampled. Otherwise the model sees the future, which looks great offline and collapses in production.</p>
-<p>The NVIDIA deck lists <b>point-in-time correctness</b> as a core benefit of the engine's temporal heterogeneous sampler; in PyG it is the <code>time_attr</code> argument.</p>`,
-            src: ['nvFraud', 'pyg2'],
+<p>Temporal heterogeneous samplers make <b>point-in-time correctness</b> the default; in PyG it is the <code>time_attr</code> argument.</p>`,
+            src: ['rdl', 'pyg2'],
         },
         {
             title: 'Precompute vs on-the-fly neighborhoods',
-            body: `<p><b>Precomputed</b> PPR lists (the Walmart approach) are cheap at training time and deterministic, but go <b>stale</b> and must be recomputed per time window (a cost raised about rolling windows in Module 5).</p>
-<p><b>On-the-fly</b> sampling is always fresh and stochastic (a regularizer) but costs sampler throughput every step. Many systems mix both: precomputed neighborhoods for training, live sampling for fresh inference.</p>`,
-            src: ['wmCollab'],
+            body: `<p><b>Precomputed</b> PPR lists (common in PinSage-style pipelines) are cheap at training time and deterministic, but go <b>stale</b> and must be recomputed per time window (a cost that comes back with rolling windows in Module 5).</p>
+<p><b>On-the-fly</b> sampling is always fresh and stochastic (a regularizer) but costs sampler throughput every step. Many systems mix both: precomputed neighborhoods for training, live walks (as in Pixie) for fresh inference.</p>`,
+            src: ['pinsage', 'pixie'],
         },
     ],
     quiz: [
@@ -79,9 +79,9 @@ GNN.module({
             answer: 1, why: 'Walk-with-restart visit frequencies converge to PPR scores.',
         },
         {
-            q: 'In the discussed Walmart recipe, what is kept from 800 walks per customer?',
-            options: ['All 1,600 visits as edges', 'The top 400 items by visit count', 'Only the first visited item', 'A random 64 items'],
-            answer: 1, why: 'Rank by visit frequency and keep the top 400, effectively a PPR neighborhood.',
+            q: 'In the worked walk recipe, what do you keep from a few hundred walks per customer?',
+            options: ['Every visit as a separate edge', 'The top T items by visit count', 'Only the first visited item', 'A uniform random sample of items'],
+            answer: 1, why: 'Rank by visit frequency and keep the top T, effectively a PPR neighborhood.',
         },
         {
             q: 'Setting the cadence exponent beta from 0 to 1 in a walk mainly...',

@@ -19,34 +19,8 @@
             return { x: g === 0 ? width * 0.22 : width * 0.78, y: pad + ((height - 2 * pad) * (idx + 0.5)) / count };
         });
     }
-    // Small deterministic force-directed layout (Fruchterman-Reingold style).
-    function forceLayout(n, edges, { width = 340, height = 300, iters = 250, seed = 3 } = {}) {
-        const r = root.GNNCore.rng(seed);
-        const pos = Array.from({ length: n }, () => ({ x: width * (0.2 + 0.6 * r()), y: height * (0.2 + 0.6 * r()) }));
-        const k = Math.sqrt((width * height) / Math.max(n, 1)) * 0.75;
-        for (let it = 0; it < iters; it++) {
-            const disp = pos.map(() => ({ x: 0, y: 0 }));
-            for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
-                const dx = pos[i].x - pos[j].x, dy = pos[i].y - pos[j].y;
-                const d = Math.max(Math.hypot(dx, dy), 0.01), f = (k * k) / d;
-                disp[i].x += (dx / d) * f; disp[i].y += (dy / d) * f;
-                disp[j].x -= (dx / d) * f; disp[j].y -= (dy / d) * f;
-            }
-            for (const [a, b] of edges) {
-                const dx = pos[a].x - pos[b].x, dy = pos[a].y - pos[b].y;
-                const d = Math.max(Math.hypot(dx, dy), 0.01), f = (d * d) / k;
-                disp[a].x -= (dx / d) * f; disp[a].y -= (dy / d) * f;
-                disp[b].x += (dx / d) * f; disp[b].y += (dy / d) * f;
-            }
-            const temp = (width / 10) * (1 - it / iters);
-            pos.forEach((p, i) => {
-                const d = Math.max(Math.hypot(disp[i].x, disp[i].y), 0.01);
-                p.x = Math.min(width - 16, Math.max(16, p.x + (disp[i].x / d) * Math.min(d, temp)));
-                p.y = Math.min(height - 16, Math.max(16, p.y + (disp[i].y / d) * Math.min(d, temp)));
-            });
-        }
-        return pos;
-    }
+    // Force layout lives in GNNCore (pure math, node-tested); re-exported here for the labs.
+    const forceLayout = (...args) => root.GNNCore.forceLayout(...args);
 
     // nodes: [{x, y, label, color, r, title, ring}], edges: [{s, t, color, width, directed, dashed}]
     function drawGraph({ nodes, edges, width = 340, height = 300, onSelect, title = 'graph', showLabels = true }) {

@@ -8,7 +8,6 @@ GNN.lab('lab02', {
         'Switch to <b>sum</b> without normalization. Why do the values explode?',
         'Read the expressivity table: which aggregators separate {a, b} from {a, a, b, b}?',
     ],
-    python: 'python/labs/lab02_message_passing.py',
     mount(stage) {
         const { h, clear } = UI, C = GNNCore;
         // 0..6 a small community, 7 = hub connected to everyone, 8-9 a pendant pair.

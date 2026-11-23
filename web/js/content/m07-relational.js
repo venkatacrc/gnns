@@ -7,7 +7,7 @@ GNN.module({
         'Build a point-in-time-correct training table.',
         'Write PQL queries for retail and fraud tasks.',
     ],
-    refs: ['rdl', 'relbench2', 'pql', 'pyg2', 'nvFraud'],
+    refs: ['rdl', 'relbench2', 'pql', 'pyg2'],
     cards: [
         {
             title: 'The RDL idea',
@@ -26,12 +26,12 @@ products(product_id, category_id FK, title, ...)</code></pre>
         },
         {
             title: 'What the model learns instead of hand-written features',
-            body: `<p>The NVIDIA deck lists what graph attention can express across columns, tables and hops:</p>
+            body: `<p>Attention over the relational graph can learn, across columns, tables and hops, what feature engineers used to write by hand:</p>
 <ul><li>Filters: last fact, last k facts, facts in the last week, upcoming holiday.</li>
 <li>Aggregations: counts, sums, recency, trends.</li>
 <li>Correlations across related entities: "customers like you".</li></ul>
 <p>Columns are encoded by type (numeric, categorical, text, timestamp, embedding), e.g. with PyG's torch_frame integration.</p>`,
-            src: ['nvFraud', 'pyg2'],
+            src: ['rdl', 'pyg2'],
         },
         {
             title: 'Training tables define the task',
@@ -70,8 +70,7 @@ FOR EACH accounts.account_id WHERE COUNT(transfers.*, -30, 0, days) > 0</code></
             body: `<ul><li><b>Leaky columns</b>: a "status = closed" column updated after the label event.</li>
 <li><b>Mutable dimension tables</b> without history: today's product category projected into last year.</li>
 <li><b>Exploding hubs</b>: a "store" node linked to millions of transactions needs sampling caps.</li>
-<li><b>Noisy, non-linear signals</b>: in early runs XGBoost beat raw Kumo Relational models. Fixes discussed: automated feature selection, denoising through Kumo Tabular before graph building, RDB Learn pipelines that aggregate multi-hop attributes into single-row representations.</li></ul>`,
-            src: ['wmTech'],
+<li><b>Noisy, non-linear signals</b>: a strong gradient-boosted-tree baseline often beats a raw relational model at first. Remedies: automated feature selection, denoising before graph building, and pipelines that aggregate multi-hop attributes into single-row representations.</li></ul>`,
         },
     ],
     quiz: [
@@ -96,9 +95,9 @@ FOR EACH accounts.account_id WHERE COUNT(transfers.*, -30, 0, days) > 0</code></
             answer: 1, why: 'v2 adds autocomplete tasks, TGB event streams and many more databases.',
         },
         {
-            q: 'Early runs saw XGBoost beat raw relational models on noisy signals. A recommended fix was...',
-            options: ['Delete the graph', 'Denoise / select features (e.g., via Kumo Tabular) and aggregate multi-hop attributes before the loss', 'Add more layers', 'Train on random splits'],
-            answer: 1, why: 'Feature selection, denoising and RDB Learn style aggregation were the recommendations.',
+            q: 'A gradient-boosted-tree baseline beats your raw relational model on noisy signals. A sensible fix is...',
+            options: ['Delete the graph', 'Denoise / select features and aggregate multi-hop attributes before the loss', 'Add more layers', 'Train on random splits'],
+            answer: 1, why: 'Feature selection, denoising and multi-hop aggregation give the relational model cleaner inputs.',
         },
     ],
 });

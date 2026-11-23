@@ -8,7 +8,6 @@ GNN.lab('lab05', {
         'Run the <b>seed sweep</b>. Does the dual encoder beat item-kNN by more than the spread?',
         'Write one sentence you could defend in a review: "Model X beats Y by Z +- W on ..."',
     ],
-    python: 'python/labs/lab05_evaluation.py',
     mount(stage) {
         const { h, clear } = UI, C = GNNCore, R = GNNRetail;
         // ---- Part A: metric calculator ----

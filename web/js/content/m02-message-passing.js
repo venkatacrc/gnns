@@ -25,8 +25,8 @@ h_v' = UPDATE(h_v, m_v)                  # combine with self</code></pre>
         {
             title: 'GraphSAGE: sample and aggregate, inductively',
             body: `<p><code>h_v' = relu( W [ h_v || mean(h_u : u in sample(N(v))) ] )</code></p>
-<p>Two ideas: keep the node's own vector separate (concatenate), and aggregate over a <b>sampled</b> neighborhood. Because it is a function of features, it is <b>inductive</b>: new customers and items get embeddings without retraining. The Walmart customer encoder is SAGE-like: a 1-hop convolution over sampled items, then a 3-layer MLP.</p>`,
-            src: ['sage', 'wmCollab'],
+<p>Two ideas: keep the node's own vector separate (concatenate), and aggregate over a <b>sampled</b> neighborhood. Because it is a function of features, it is <b>inductive</b>: new customers and items get embeddings without retraining. PinSage-style customer encoders follow the same pattern: a 1-hop convolution over sampled items, then an MLP.</p>`,
+            src: ['sage', 'pinsage'],
         },
         {
             title: 'GAT: let the model choose which neighbors matter',
@@ -44,8 +44,8 @@ h_v' = UPDATE(h_v, m_v)                  # combine with self</code></pre>
         },
         {
             title: 'Layers = hops = receptive field',
-            body: `<p>k layers let information travel k hops. In a bipartite graph, customer -> item -> customer -> item is 3 hops: "items bought by people who bought what I bought". Most production recommenders use <b>1-3 layers</b>; the Walmart customer tower uses one convolution and relies on random-walk neighborhoods to reach further.</p>`,
-            src: ['wmCollab', 'pinsage'],
+            body: `<p>k layers let information travel k hops. In a bipartite graph, customer -> item -> customer -> item is 3 hops: "items bought by people who bought what I bought". Most production recommenders use <b>1-3 layers</b>; PinSage-style models keep convolutions few and let random-walk neighborhoods reach further.</p>`,
+            src: ['pinsage'],
         },
         {
             title: 'Over-smoothing',
@@ -55,8 +55,8 @@ h_v' = UPDATE(h_v, m_v)                  # combine with self</code></pre>
         {
             title: 'Over-squashing and long-range signal',
             body: `<p>The k-hop neighborhood grows exponentially, but it must be squeezed into one fixed-size vector. Information from far away gets <b>squashed</b> through bottleneck nodes. A laundering chain 6 hops long is exactly this kind of signal.</p>
-<p>The NVIDIA fraud material frames graph transformers as <b>"teleporting" the signal</b>: attention connects distant nodes directly instead of relaying hop by hop (Module 8).</p>`,
-            src: ['nvFraud', 'relgt'],
+<p>Graph transformers attack this by <b>"teleporting" the signal</b>: attention connects distant nodes directly instead of relaying hop by hop (Module 8).</p>`,
+            src: ['relgt'],
         },
         {
             title: 'Heterogeneous message passing',
@@ -76,8 +76,7 @@ model = to_hetero(SAGE(64), data.metadata(), aggr='sum')</code></pre>`,
             body: `<ul><li><b>Node classification</b>: is this account a mule? Linear head on h_v.</li>
 <li><b>Link prediction / retrieval</b>: score = <code>u_c . e_p</code> (dot product) or cosine. Dot product scores support approximate nearest-neighbor search over millions of items.</li>
 <li><b>Graph-level</b>: pool node vectors (e.g., classify a whole transaction subgraph).</li></ul>
-<p>Cosine vs dot-product objectives were one of the recipe choices flagged for review in the Kumo model-planner recipes.</p>`,
-            src: ['wmCollab'],
+<p>Cosine vs dot product is a real modelling choice: a dot product lets popularity creep in through vector norms, while cosine removes norm and scores only direction.</p>`,
         },
     ],
     quiz: [

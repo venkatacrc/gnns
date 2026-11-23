@@ -1,4 +1,4 @@
-// Synthetic money-movement graph with planted AML patterns from the NVIDIA/Kumo fraud deck:
+// Synthetic money-movement graph with planted AML typologies (as in the public AMLworld benchmark):
 // fan-in (mule collection), fan-out (dispersal), cycles (round-tripping), scatter-gather
 // (structuring through intermediaries) and a long hop chain (layering).
 (function (root) {
@@ -16,7 +16,8 @@
             const s = C.randInt(r, normalAccounts);
             let t = C.randInt(r, normalAccounts);
             if (t === s) t = (t + 1) % normalAccounts;
-            pay(s, t, 20 + r() * 400, C.randInt(r, 90));
+            // Everyday payments are heavy-tailed (log-normal, median ~110): a few overlap mule-sized transfers.
+            pay(s, t, Math.min(5000, Math.exp(4.7 + 1.1 * C.gaussian(r))), C.randInt(r, 90));
         }
         const patterns = {};
         // fan-in: six distinct victims / mule recruits pay one collector within a few days
@@ -59,7 +60,54 @@
         return C.adjacencyLists(graph.accounts.length, graph.txns.map((t) => [t.s, t.t]));
     }
 
-    const api = { makeTransactionGraph, undirectedAdj };
+    // Risk score per account. Detectors run on transfers of at least `minAmount` (real AML rules condition on
+    // amounts; structure alone over small everyday payments is mostly noise). Evidence combines by noisy-OR,
+    // and each detector counts ONCE per account: noisy-OR assumes independent evidence, and an account sitting
+    // in ten overlapping cycles has one piece of cycle evidence, not ten.
+    const DETECTOR_WEIGHT = { fanIn: 0.6, fanOut: 0.6, cycle: 0.4, scatterGather: 0.4 };
+    function riskScores(graph, { mode = 'combined', minFanIn = 5, minFanOut = 5, hops = 3, decay = 0.6, minAmount = 0 } = {}) {
+        const n = graph.accounts.length;
+        const s = new Array(n).fill(0);
+        const hit = (i, w) => { s[i] = 1 - (1 - s[i]) * (1 - w); };
+        if (mode !== 'propagation') {
+            const txns = graph.txns.filter((t) => t.amount >= minAmount);
+            const found = {
+                fanIn: C.fanIn(n, txns, minFanIn),
+                fanOut: C.fanOut(n, txns, minFanOut),
+                cycle: C.findCycles(n, txns, 5).flat(),
+                scatterGather: C.scatterGather(n, txns, 3).flatMap((sg) => [sg.source, sg.sink, ...sg.mids]),
+            };
+            for (const [detector, members] of Object.entries(found)) for (const i of new Set(members)) hit(i, DETECTOR_WEIGHT[detector]);
+        }
+        if (mode !== 'patterns') {
+            const prop = C.labelPropagation(undirectedAdj(graph), graph.knownBad, hops, decay);
+            prop[prop.length - 1].forEach((v, i) => hit(i, v));
+        }
+        return s;
+    }
+
+    // Average precision of a score vector against the planted (non-normal) roles: the area-under-PR proxy.
+    // Ties are averaged over random orderings; breaking them by index would systematically rank the
+    // low-numbered normal accounts first and understate every detector.
+    function averagePrecision(graph, scores, draws = 20) {
+        const bad = (i) => graph.accounts[i].role !== 'normal';
+        const total = graph.accounts.filter((a) => a.role !== 'normal').length;
+        if (!total) return 0;
+        const r = C.rng(1234);
+        let acc = 0;
+        for (let d = 0; d < draws; d++) {
+            const tieBreak = C.shuffle(r, scores.map((_, i) => i));
+            const rankOf = new Array(scores.length);
+            tieBreak.forEach((i, k) => { rankOf[i] = k; });
+            const order = scores.map((_, i) => i).sort((a, b) => scores[b] - scores[a] || rankOf[a] - rankOf[b]);
+            let hits = 0, sum = 0;
+            order.forEach((i, rank) => { if (bad(i)) { hits++; sum += hits / (rank + 1); } });
+            acc += sum / total;
+        }
+        return acc / draws;
+    }
+
+    const api = { makeTransactionGraph, undirectedAdj, riskScores, averagePrecision };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.GNNFraud = api;
 })(typeof window !== 'undefined' ? window : globalThis);

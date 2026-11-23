@@ -58,7 +58,7 @@
             h('section', { class: 'hero' },
                 h('div', { class: 'kicker' }, 'Graph Neural Networks, step by step'),
                 h('h1', {}, 'From baskets to graph transformers'),
-                h('p', {}, 'A hands-on path through GNNs for retail recommendations and fraud, built from our NVIDIA / Kumo technical sessions and the relational deep learning papers behind them. Every module has concept cards, a quiz and an interactive lab that runs right here, offline, on your Mac or phone.'),
+                h('p', {}, 'A hands-on path through GNNs for retail recommendations and fraud, grounded in the relational deep learning papers and public benchmarks behind them. Every module has concept cards, a quiz and an interactive lab that runs right here, offline, on your Mac or phone.'),
                 h('div', { class: 'nav-row' },
                     h('a', { class: 'btn primary', href: started ? state.last : link(GNN.modules[0]) }, started ? 'Continue where you left off' : 'Start module 0'),
                     h('a', { class: 'btn', href: '#/about' }, 'How this course works'))),
@@ -231,24 +231,24 @@
     function refChip(key) {
         const r = GNN.ref(key);
         if (!r) return null;
-        return h('span', { class: `chip ${r.kind}`, title: r.title }, r.kind === 'walmart' ? 'Walmart x NVIDIA notes' : `${r.authors.split(',')[0]} ${r.year}`);
+        return h('span', { class: `chip ${r.kind}`, title: r.title }, `${r.authors.split(',')[0]} ${r.year}`);
     }
     function renderRefs(m, view) {
         const keys = [...new Set([...(m.refs || []), ...m.cards.flatMap((c) => c.src || [])])];
         view.append(h('div', { class: 'card' }, h('h2', {}, 'Sources for this module'),
             h('ul', {}, keys.map((k) => GNN.ref(k)).filter(Boolean).map((r) => h('li', {},
-                r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener' }, r.title) : h('strong', {}, r.title),
-                r.authors ? h('span', { class: 'muted' }, ` · ${r.authors} (${r.year})`) : h('span', { class: 'chip walmart' }, ' internal'),
+                h('a', { href: r.url, target: '_blank', rel: 'noopener' }, r.title),
+                h('span', { class: 'muted' }, ` · ${r.authors} (${r.year})`),
                 h('div', { class: 'small muted' }, r.note))))));
     }
 
     function renderAbout() {
         main.append(h('h1', {}, 'How this course works'), h('div', { class: 'card', html: `
             <p><strong>Each module</strong> has three parts. <em>Learn</em>: concept cards you mark as known or to review. <em>Test</em>: a short quiz with explanations. <em>Lab</em>: an interactive experiment on synthetic retail or transaction data. The labs run entirely in your browser, so they work offline.</p>
-            <p><strong>Two threads run through everything</strong>: the Walmart Foundation GNN (customer-product recommendations, substitutes vs complements) and fraud / AML on transaction graphs. Cards tagged <span class="chip walmart">Walmart x NVIDIA notes</span> come from our internal sessions; <span class="chip paper">paper</span> chips link to the public research.</p>
-            <p><strong>On your Pixel</strong>: open the course URL in Chrome, then choose <em>Install app</em> (or <em>Add to Home screen</em>). It then launches full screen and works offline. <strong>On your Mac</strong>: use the GNN Lab app, or open the same URL in a browser.</p>
-            <p><strong>Python track</strong>: <code>python/labs/</code> mirrors the core labs in numpy for a keyboard-and-terminal session on the Mac.</p>
-            <p class="small muted">Internal-source content: do not publish this build to a public site.</p>` }));
+            <p><strong>Two threads run through everything</strong>: a PinSage-style retail recommender (customer-product graphs, substitutes vs complements) and fraud / AML on transaction graphs. <span class="chip paper">paper</span> chips link to the public research behind each card. Lab numbers come from small synthetic worlds: they illustrate ideas and are never production results.</p>
+            <p><strong>On your Pixel</strong>: open the course URL in Chrome, then choose <em>Install app</em> (or <em>Add to Home screen</em>). It then launches full screen and works offline. <strong>On your Mac</strong>: open the same URL and install it as an app: in Safari choose <em>File ▸ Add to Dock</em> (macOS Sonoma or later), or in Chrome use <em>Install page as app</em> from the menu. It gets its own window and Dock icon and also works offline.</p>
+            <p><strong>Serving it</strong>: run <code>node tools/serve.js</code> on the Mac; it prints the URL for your phone on the same Wi-Fi.</p>
+            <p class="small muted">Paper results quoted in the cards are what the authors report; treat them as hypotheses to re-test on your own data.</p>` }));
         const refs = Object.values(GNN.refs);
         main.append(h('div', { class: 'card' }, h('h2', {}, 'All sources'), h('ul', {}, refs.map((r) => h('li', {},
             r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener' }, r.title) : h('strong', {}, r.title),

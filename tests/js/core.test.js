@@ -124,6 +124,35 @@ test('dual encoder beats popularity; removing the positive mask lowers loss but 
     assert.ok(leaky.heldRecall < masked.heldRecall, 'but generalize worse');
 });
 
+test('forceLayout fits the box with no overlapping nodes on the fraud graph', () => {
+    const F = require('../../web/js/core/fraud.js');
+    const g = F.makeTransactionGraph(5);
+    const pos = C.forceLayout(g.accounts.length, g.txns.map((t) => [t.s, t.t]), { width: 360, height: 340, seed: 9, iters: 200 });
+    assert.equal(pos.length, g.accounts.length);
+    for (const p of pos) {
+        assert.ok(p.x >= 0 && p.x <= 360 && p.y >= 0 && p.y <= 340, `node outside box: ${JSON.stringify(p)}`);
+    }
+    for (let i = 0; i < pos.length; i++) for (let j = i + 1; j < pos.length; j++) {
+        assert.ok(Math.hypot(pos[i].x - pos[j].x, pos[i].y - pos[j].y) >= 12, `nodes ${i} and ${j} overlap`);
+    }
+    assert.deepEqual(C.forceLayout(1, []), [{ x: 170, y: 150 }]);
+});
+
+test('fraud risk scores: detectors count once, ties are fair, amounts help', () => {
+    const F = require('../../web/js/core/fraud.js');
+    const g = F.makeTransactionGraph(5);
+    const base = g.accounts.filter((a) => a.role !== 'normal').length / g.accounts.length;
+    // all-equal scores should give roughly the base rate, not an index-order artifact
+    assert.ok(Math.abs(F.averagePrecision(g, new Array(g.accounts.length).fill(0)) - base) < 0.05);
+    // each detector contributes at most once: cap = noisy-OR of all four weights
+    const cap = 1 - (1 - 0.6) * (1 - 0.6) * (1 - 0.4) * (1 - 0.4);
+    const raw = F.riskScores(g, { mode: 'patterns' });
+    assert.ok(Math.max(...raw) <= cap + 1e-9, `score ${Math.max(...raw)} exceeds single-count cap ${cap}`);
+    // conditioning on amount beats structure alone
+    const filtered = F.riskScores(g, { mode: 'patterns', minAmount: 500 });
+    assert.ok(F.averagePrecision(g, filtered) > F.averagePrecision(g, raw) + 0.2);
+});
+
 test('meanStd reports population mean and spread', () => {
     const { mean, std } = C.meanStd([2, 4, 4, 4, 5, 5, 7, 9]);
     assert.equal(mean, 5);

@@ -50,6 +50,22 @@ for (const m of GNN.modules) {
     });
 }
 
+// A lab may only advertise a Python companion that actually ships in the repo.
+for (const [id, lab] of Object.entries(GNN.labs)) {
+    if (lab.python && !fs.existsSync(path.join(WEB, '..', lab.python))) problems.push(`${id}: python companion ${lab.python} does not exist`);
+}
+
+// Every CSS custom property referenced from JS must be defined in app.css (undefined vars fail silently).
+const css = fs.readFileSync(path.join(WEB, 'app.css'), 'utf8');
+const definedVars = new Set([...css.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+const jsFiles = (dir) => fs.readdirSync(dir, { withFileTypes: true })
+    .flatMap((e) => (e.isDirectory() ? jsFiles(path.join(dir, e.name)) : e.name.endsWith('.js') ? [path.join(dir, e.name)] : []));
+for (const file of jsFiles(path.join(WEB, 'js'))) {
+    for (const [, name] of fs.readFileSync(file, 'utf8').matchAll(/var\((--[a-z0-9-]+)\)/g)) {
+        if (!definedVars.has(name)) problems.push(`${path.relative(WEB, file)}: CSS variable ${name} is not defined in app.css`);
+    }
+}
+
 console.log(`${GNN.modules.length} modules, ${cards} cards, ${questions} quiz questions, ` +
     `${Object.keys(GNN.labs).length} labs, ${Object.keys(GNN.refs).length} sources`);
 if (problems.length) {

@@ -7,7 +7,7 @@ GNN.module({
         'Derive co-purchase (A^T A) and explain popularity bias in raw counts.',
         'Model heterogeneous, temporal, omnichannel graphs in PyG.',
     ],
-    refs: ['wmCollab', 'pyg2', 'rdl'],
+    refs: ['pinsage', 'mcauley', 'pyg2', 'rdl'],
     cards: [
         {
             title: 'Nodes, edges, weights, direction',
@@ -16,7 +16,7 @@ GNN.module({
         },
         {
             title: 'Adjacency matrix vs adjacency list',
-            body: `<p>The adjacency matrix <code>A[i][j]</code> is n x n. With hundreds of millions of customers and 31M items it would be absurdly <b>sparse</b>: a shopper touches a few hundred items out of millions.</p>
+            body: `<p>The adjacency matrix <code>A[i][j]</code> is n x n. With hundreds of millions of customers and tens of millions of items it would be absurdly <b>sparse</b>: a shopper touches a few hundred items out of millions.</p>
 <p>Real systems store <b>edge lists / CSR</b> (compressed sparse rows): for each node, the array of its neighbors. PyG stores edges as a <code>2 x E</code> <code>edge_index</code> tensor.</p>`,
         },
         {
@@ -29,8 +29,8 @@ GNN.module({
         {
             title: 'Why raw co-purchase lies: popularity and cadence',
             body: `<p>Bananas and milk are bought <b>twice a week</b>, coffee monthly, a TV once a year. Raw counts make staples co-occur with <i>everything</i>, so "customers who bought a TV also bought... bananas".</p>
-<p>Fixes: normalize. <b>Cosine</b> <code>co(a,b)/sqrt(deg a * deg b)</code>, <b>lift</b> <code>P(a,b) / (P(a) P(b))</code>, PMI, or cadence-aware weights. The Walmart walks use a <b>purchase-rate decay / frequency bias</b> so high-frequency consumables do not drown out big-ticket items.</p>`,
-            src: ['wmCollab'],
+<p>Fixes: normalize. <b>Cosine</b> <code>co(a,b)/sqrt(deg a * deg b)</code>, <b>lift</b> <code>P(a,b) / (P(a) P(b))</code>, PMI, or cadence-aware weights. Cadence-aware random walks (Lab 3) use a <b>purchase-rate decay / frequency bias</b> so high-frequency consumables do not drown out big-ticket items.</p>`,
+            src: ['node2vec', 'pinsage'],
         },
         {
             title: 'Co-occurrence is not one relationship',
@@ -39,7 +39,7 @@ GNN.module({
 <li><b>Substitutes</b>: Jif vs Skippy peanut butter (often <i>not</i> in the same basket, but chosen between).</li>
 <li><b>Random co-occurrence</b>: detergent + bread from a general household trip.</li></ul>
 <p>Separating these is Module 6. Basket-derived embedding spaces pull frequently co-bought items together and push incidental pairs apart once enough baskets lack them.</p>`,
-            src: ['wmCollab'],
+            src: ['mcauley'],
         },
         {
             title: 'Heterogeneous graphs',
@@ -50,15 +50,15 @@ data['customer'].x = cust_feats      # [N_c, 256] identity embeddings
 data['product'].x  = prod_feats      # [N_p, 768] catalog text embeddings
 data['customer', 'buys', 'product'].edge_index = edges   # [2, E]
 data['customer', 'buys', 'product'].time = ts            # [E]</code></pre>`,
-            src: ['pyg2', 'wmCollab'],
+            src: ['pyg2'],
         },
         {
-            title: 'Node and edge features in the Walmart design',
-            body: `<ul><li><b>Customer input</b>: 256-d behavioral embeddings from the Customer Identity team (search and click aware, avoiding demographic-only bias).</li>
-<li><b>Product input</b>: about 768-d semantic catalog embeddings, which already know LG TV is similar to Samsung TV.</li>
-<li><b>Edges</b>: purchase relations over 14 months of omnichannel history.</li></ul>
+            title: 'Start from good node features',
+            body: `<ul><li><b>Customer input</b>: behavioral embeddings learned from search and click history, which avoid leaning on demographics alone.</li>
+<li><b>Product input</b>: semantic embeddings of catalog text (a 768-d sentence encoder is a typical choice), which already know an LG TV is similar to a Samsung TV.</li>
+<li><b>Edges</b>: purchases over a long, fixed history window, with timestamps.</li></ul>
 <p>Good input features mean the GNN does not need to learn semantics from scratch, only how behavior bends them.</p>`,
-            src: ['wmCollab'],
+            src: ['pinsage'],
         },
         {
             title: 'Time is part of the graph',
@@ -67,10 +67,9 @@ data['customer', 'buys', 'product'].time = ts            # [E]</code></pre>`,
             src: ['rdl', 'pyg2'],
         },
         {
-            title: 'Omnichannel identity',
-            body: `<p>The same customer buys in store, online and via pickup. Unifying those into one customer node is what makes the graph omnichannel, and it is why Walmart's Customer Identity embeddings are valuable inputs.</p>
-<p>It also means most edges come from <b>in-store purchases with no clicks or impressions</b>, which shapes evaluation (Module 5).</p>`,
-            src: ['wmCollab'],
+            title: 'One customer across channels',
+            body: `<p>The same customer buys in store, online and via pickup. Resolving those into one customer node (identity resolution) is what makes a retail graph <i>omnichannel</i>, and it is why cross-channel customer embeddings are valuable inputs.</p>
+<p>It also means many edges come from <b>in-store purchases with no clicks or impressions</b>, which shapes evaluation (Module 5).</p>`,
         },
         {
             title: 'A database is already a graph',

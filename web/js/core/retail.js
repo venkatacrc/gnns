@@ -1,6 +1,6 @@
 // Synthetic omnichannel retail world + PinSage-style recommender pieces used by labs 1, 3, 4 and 5.
-// Mirrors the Walmart Foundation GNN design discussed with NVIDIA/Kumo: a bipartite
-// customer-product graph, frequency-biased random walks, three negative pools and masked positives.
+// Follows the public PinSage recipe: a bipartite customer-product graph, frequency-biased
+// random walks, three negative pools and masked positives.
 (function (root) {
     'use strict';
     const C = (typeof module !== 'undefined' && module.exports) ? require('./gnn.js') : root.GNNCore;
@@ -37,7 +37,7 @@
     // Categories whose items travel as a bundle (true complements), so co-purchase is real signal.
     const BUNDLES = new Set(['Grilling', 'School', 'Snacks']);
     const isStaple = (product) => product.cadence >= 40;
-    const DAYS = 14 * 30; // 14 months of history, like the Walmart training window
+    const DAYS = 14 * 30; // ~14 months of synthetic history: long enough for cadence and seasonality
 
     function makeRetailWorld(seed = 7, { customers = 80, outOfTimeDays = 30 } = {}) {
         const r = C.rng(seed);
@@ -151,7 +151,7 @@
     // Tiny dual encoder trained with sampled softmax.
     //   product tower: free embedding e_p          (inductive MLP in production; free vectors keep this readable)
     //   customer tower: u_c = W * mean(e_p over the customer's conv set)   (a 1-hop graph convolution)
-    // opts.mask: hold the target positive out of the conv set (the 48/16 trick) to block shortcut leakage.
+    // opts.mask: hold the target positive out of the conv set (positive masking) to block shortcut leakage.
     // opts.randomNegs / opts.hardNegs: sizes of the easy (uniform catalog) and hard (same category) pools.
     // Defaults come from tools/seed_sweep.js: in this small world, same-category "hard" negatives are often
     // true positives (false negatives), so the random-only pool generalizes best. Lab 4 lets you verify that.

@@ -138,6 +138,42 @@
         return { perHop, total: 1 + perHop.reduce((a, b) => a + b, 0) };
     }
 
+    // Fruchterman-Reingold layout. Simulated unconstrained in unit space (clamping to the box during the
+    // simulation piles nodes on the walls), pulled toward the centroid so disconnected parts stay close,
+    // then scaled to fit the box. gravity = 2 gave zero overlaps on every lab graph (tools/layout_probe.js).
+    function forceLayout(n, edges, { width = 340, height = 300, iters = 250, seed = 3, gravity = 2, pad = 18 } = {}) {
+        const r = rng(seed);
+        const pos = Array.from({ length: n }, () => ({ x: r() - 0.5, y: r() - 0.5 }));
+        const k = 1 / Math.sqrt(Math.max(n, 1));
+        for (let it = 0; it < iters; it++) {
+            const disp = pos.map(() => ({ x: 0, y: 0 }));
+            for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+                const dx = pos[i].x - pos[j].x, dy = pos[i].y - pos[j].y;
+                const d = Math.max(Math.hypot(dx, dy), 1e-4), f = (k * k) / d;
+                disp[i].x += (dx / d) * f; disp[i].y += (dy / d) * f;
+                disp[j].x -= (dx / d) * f; disp[j].y -= (dy / d) * f;
+            }
+            for (const [a, b] of edges) {
+                const dx = pos[a].x - pos[b].x, dy = pos[a].y - pos[b].y;
+                const d = Math.max(Math.hypot(dx, dy), 1e-4), f = (d * d) / k;
+                disp[a].x -= (dx / d) * f; disp[a].y -= (dy / d) * f;
+                disp[b].x += (dx / d) * f; disp[b].y += (dy / d) * f;
+            }
+            const temp = 0.1 * (1 - it / iters) + 0.002;
+            pos.forEach((p, i) => {
+                disp[i].x -= gravity * p.x; disp[i].y -= gravity * p.y;
+                const d = Math.max(Math.hypot(disp[i].x, disp[i].y), 1e-9);
+                p.x += (disp[i].x / d) * Math.min(d, temp); p.y += (disp[i].y / d) * Math.min(d, temp);
+            });
+        }
+        if (n === 1) return [{ x: width / 2, y: height / 2 }];
+        const xs = pos.map((p) => p.x), ys = pos.map((p) => p.y);
+        const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+        const sc = Math.min((width - 2 * pad) / Math.max(x1 - x0, 1e-9), (height - 2 * pad) / Math.max(y1 - y0, 1e-9));
+        const ox = (width - sc * (x1 - x0)) / 2, oy = (height - sc * (y1 - y0)) / 2;
+        return pos.map((p) => ({ x: ox + sc * (p.x - x0), y: oy + sc * (p.y - y0) }));
+    }
+
     // Personalized PageRank by power iteration. adj is a list of neighbor lists.
     function ppr(adj, seeds, { alpha = 0.15, iters = 30 } = {}) {
         const n = adj.length;
@@ -297,7 +333,7 @@
     const api = {
         rng, randInt, choice, gaussian, shuffle, sample, weightedChoice,
         zeros, randomMatrix, matmul, transpose, matvec, relu, dot, norm, cosine, softmax, meanVec, featureSpread,
-        adjacencyLists, adjacencyMatrix, messagePass, gcnLayer, fanoutCost, ppr, labelPropagation,
+        adjacencyLists, adjacencyMatrix, messagePass, gcnLayer, fanoutCost, forceLayout, ppr, labelPropagation,
         decayWeight, hitAtK, recallAtK, precisionAtK, mrr, ndcgAtK, topK, meanStd,
         fanIn, fanOut, findCycles, scatterGather, greedyPCST,
     };

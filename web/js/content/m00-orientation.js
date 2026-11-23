@@ -1,13 +1,13 @@
 GNN.module({
     id: 'm00', num: 0, minutes: 20,
     title: 'Orientation: why graphs, and the map of this course',
-    summary: 'Why relationships beat flat rows, the two case studies we will follow (Walmart recommendations and fraud), and how to study here.',
+    summary: 'Why relationships beat flat rows, the two case studies we will follow (retail recommendations and fraud), and how to study here.',
     objectives: [
         'Explain what a graph adds over a flat feature table.',
         'Describe the two running case studies and the end-to-end GNN lifecycle.',
-        'Treat numbers quoted from internal discussions as hypotheses to validate, not targets.',
+        'Treat numbers quoted in papers and blog posts as hypotheses to validate on your data, not targets.',
     ],
-    refs: ['wmCollab', 'wmTech', 'nvFraud', 'rdl'],
+    refs: ['pinsage', 'rdl', 'pyg2', 'kumorfm2', 'weber'],
     cards: [
         {
             title: 'What a flat table cannot see',
@@ -15,16 +15,16 @@ GNN.module({
 <p>A <b>graph</b> keeps those relationships as first-class data: entities are <b>nodes</b>, relationships are <b>edges</b>. A <b>Graph Neural Network (GNN)</b> learns from both the features of a node and the structure around it.</p>`,
         },
         {
-            title: 'Case study 1: the Walmart Foundation GNN',
-            body: `<p>A PinSage-inspired <b>bipartite customer-product graph</b> built from about <b>14 months of omnichannel transactions</b> over a catalog of roughly <b>31M items</b>. It produces customer and product embeddings for downstream teams (search, ranking, ads, personalization) and candidate items for retrieval.</p>
-<p>You will rebuild a miniature version of it across Modules 1-5: graph construction, frequency-biased random walks, positives and three pools of negatives, masking, and offline evaluation without click feedback.</p>`,
-            src: ['wmCollab', 'pinsage'],
+            title: 'Case study 1: a retail recommender in the PinSage style',
+            body: `<p>Picture a large retailer that sells in stores and online. Customers and products form a <b>bipartite graph</b> (an edge = a purchase). A PinSage-style GNN turns that graph into <b>customer and product embeddings</b> that search, ranking, ads and personalization can all reuse, and into candidate items for retrieval.</p>
+<p>PinSage itself ran on a graph of about 3 billion nodes at Pinterest. You will rebuild a miniature version across Modules 1-5: graph construction, frequency-biased random walks, positives and negatives, masking, and offline evaluation without click feedback.</p>`,
+            src: ['pinsage'],
         },
         {
             title: 'Case study 2: fraud and money movement',
             body: `<p>Accounts, cards, devices, merchants and wallets connected by transactions over time. Fraud hides in <b>structure</b>: fan-in to a mule account, cycles that round-trip money, scatter-gather structuring, long hop chains that layer funds.</p>
-<p>Module 9 and its lab use the patterns and the platform ideas from the NVIDIA / Kumo fraud material.</p>`,
-            src: ['nvFraud'],
+<p>Module 9 and its lab use these standard anti-money-laundering typologies on a synthetic transaction graph, with public datasets such as Elliptic and AMLworld as the real-world reference points.</p>`,
+            src: ['weber', 'amlworld'],
         },
         {
             title: 'The lifecycle you will walk through',
@@ -48,32 +48,30 @@ GNN.module({
 <li><b>Heterogeneous</b>: several node and edge types. <b>Temporal</b>: edges carry timestamps.</li></ul>`,
         },
         {
-            title: 'Where NVIDIA and Kumo fit',
-            body: `<p>Kumo builds on <b>PyG</b> (PyTorch Geometric) and relational deep learning: models trained directly on multi-table data, the <b>KumoRFM</b> relational foundation model, and tabular foundation models (Kumo Tabular / RDB Learn) for sparse-label problems.</p>
-<p>In our sessions the NVIDIA team committed to <b>open weights and open training recipes</b>, an engine with disaggregated sampling and multi-GPU support on the roadmap, and decision-model heads for deterministic outputs. You will meet each of these where it belongs in the lifecycle.</p>`,
-            src: ['wmTech', 'pyg2', 'kumorfm2'],
+            title: 'The open-source toolbox',
+            body: `<p><b>PyG</b> (PyTorch Geometric) is the workhorse library: heterogeneous and temporal graphs, neighbor sampling, feature and graph stores. <b>Relational deep learning</b> (RDL) and the <b>RelBench</b> benchmark treat a whole multi-table database as one graph. GPU graph libraries (for example RAPIDS cuGraph) speed up sampling and analytics at scale.</p>
+<p>On top of these sit <b>relational foundation models</b> such as KumoRFM, which predict from raw multi-table data with in-context learning. Their headline results are reported by the vendor that builds them: useful evidence, but evidence to re-test on your own data.</p>`,
+            src: ['pyg2', 'rdl', 'kumorfm2'],
         },
         {
-            title: 'Rule of thumb from the sessions: tabular FM or custom GNN?',
-            body: `<p>The working rule discussed with NVIDIA / Kumo:</p>
-<ul><li><b>Sparse labels, a graph exists</b> (tens to hundreds of labeled examples): start with a tabular / relational <b>foundation model</b>, which learns from context.</li>
+            title: 'A common heuristic: foundation model or custom GNN?',
+            body: `<ul><li><b>Sparse labels, a graph exists</b> (tens to hundreds of labeled examples): start with a tabular / relational <b>foundation model</b>, which learns from context.</li>
 <li><b>Massive interaction data</b> (billions of purchases): <b>train a custom GNN</b> on your own objective.</li></ul>
-<p>Most real programs use both: an FM for fast baselines and many small tasks, a custom GNN for the flagship embedding.</p>`,
-            src: ['wmCollab'],
+<p>Most real programs use both: a foundation model for fast baselines and many small tasks, a custom GNN for the flagship embedding. Treat this as a starting heuristic, not a law; Module 8 shows how to test it.</p>`,
+            src: ['kumorfm2', 'plurel'],
         },
         {
-            title: 'Numbers from meetings are hypotheses',
-            body: `<p>You will see settings like <b>800 walks per customer</b>, <b>top-64 positives</b>, <b>128 / 64 / 700 negatives</b>, a <b>48 / 16 positive mask</b>, <b>40% Hit@100</b> and a <b>T-60 / T-30</b> proxy evaluation. They describe one team's current setup as discussed, not tuned truths.</p>
-<blockquote>Treat each one as a knob with a reason behind it. The labs let you turn the knob and watch what happens.</blockquote>`,
-            src: ['wmCollab'],
+            title: 'Numbers in papers are hypotheses',
+            body: `<p>You will see settings like <i>walks per user</i>, <i>top-T neighbors by visit count</i>, <i>negatives per positive</i> and <i>Hit@K on a held-out window</i>. A number in a paper or blog post describes one team's data and constraints, not a tuned truth for yours.</p>
+<blockquote>Treat each one as a knob with a reason behind it. The labs let you turn the knob and watch what happens, across several random seeds.</blockquote>`,
+            src: ['pinsage'],
         },
         {
             title: 'How to study with this app',
             body: `<ul>
 <li><b>Learn</b>: read a card, then mark it <i>Got it</i> or <i>Review again</i> (keys K / R, arrows to move, swipe on phone).</li>
 <li><b>Test</b>: the quiz explains every answer. Retry just the ones you missed.</li>
-<li><b>Lab</b>: change one thing at a time and predict the result before you look.</li>
-<li><b>Python track</b> on the Mac: <code>python/labs/</code> mirrors the core labs in numpy.</li></ul>
+<li><b>Lab</b>: change one thing at a time and predict the result before you look.</li></ul>
 <p>Everything works offline once loaded.</p>`,
         },
     ],
@@ -86,17 +84,17 @@ GNN.module({
         {
             q: 'A new product enters the catalog with text and image features but no purchases yet. Which property lets a model still embed it?',
             options: ['Transductive training', 'Inductive encoders that compute embeddings from features', 'Deeper message passing', 'Larger negative pools'],
-            answer: 1, why: 'Inductive encoders map features to embeddings, so unseen nodes get vectors. That is why the Walmart product tower is a feature MLP.',
+            answer: 1, why: 'Inductive encoders map features to embeddings, so unseen nodes get vectors. That is why a product tower built as a feature MLP handles cold start.',
         },
         {
-            q: 'Per the rule discussed with NVIDIA / Kumo, when is training a custom GNN the preferred route?',
+            q: 'Per the common heuristic, when is training a custom GNN the preferred route?',
             options: ['When only 50 labeled examples exist', 'When large-scale interaction data exists', 'When there is no graph at all', 'When latency does not matter'],
-            answer: 1, why: 'Foundation models shine in sparse-label regimes; with massive interaction data a custom GNN trained on your own objective is preferred.',
+            answer: 1, why: 'Foundation models shine in sparse-label regimes; with massive interaction data a custom GNN trained on your own objective is usually preferred.',
         },
         {
-            q: 'How should you treat "800 walks per customer" or "40% Hit@100" from the sessions?',
-            options: ['As validated industry targets', 'As hypotheses and current settings to test and tune', 'As upper bounds', 'As contractual SLAs'],
-            answer: 1, why: 'They describe a current setup as discussed. Validate them on your data, which is exactly what the labs practice.',
+            q: 'How should you treat a setting like "50 neighbors per node" or a Hit@K quoted in a paper?',
+            options: ['As validated industry targets', 'As hypotheses and starting settings to test and tune', 'As upper bounds', 'As contractual SLAs'],
+            answer: 1, why: 'They describe one team\'s setup. Validate them on your data, which is exactly what the labs practice.',
         },
         {
             q: 'After 3 message-passing layers, a node\'s representation depends on...',
